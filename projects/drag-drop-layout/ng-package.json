@@ -3,5 +3,10 @@
   "dest": "../../dist/drag-drop-layout",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "whitelistedNonPeerDependencies": [
+    "tslib",
+    "@angular/cdk",
+    "angular-resizable-element"
+  ]
 }

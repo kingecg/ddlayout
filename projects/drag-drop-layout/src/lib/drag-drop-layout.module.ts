@@ -14,6 +14,6 @@ import {DragDropModule} from '@angular/cdk/drag-drop'
     ResizableModule,
     DragDropModule
   ],
-  exports: [DragDropLayoutComponent,DdLayoutCellComponent]
+  exports: [DragDropLayoutComponent,DdLayoutCellComponent, DdLayoutGridComponent]
 })
 export class DragDropLayoutModule { }

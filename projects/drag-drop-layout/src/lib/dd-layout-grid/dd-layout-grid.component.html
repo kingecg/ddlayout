@@ -1,6 +1,11 @@
 <ng-container *ngIf="inited">
     <ddl-dd-layout-cell *ngFor="let cell of cells; index as i; " [gridContainer]="gridLayout" [dropList]="droplist"
-        [edit]="true" [gridLayoutRect]="cell.rect" (gridLayoutRectChange)="onCellSizeChange($event,i)" (onResize)="onCellSizeChange($event,i,true)">
-        {{cell.label}}
+        [edit]="true" [gridLayoutRect]="cell.rect" (gridLayoutRectChange)="onCellSizeChange($event,i)" (onResize)="onCellSizeChange($event,i,true)"
+        (dragMoving)="onDragMoving($event,i)"
+        (dragEnd) = "onDragEnd($event,i)">
+        <ng-container *ngIf="!cellTemplate">{{cell.label}}</ng-container>
+        <ng-container  *ngTemplateOutlet="cellTemplate;context:{data:cell}" >
+           
+        </ng-container>
     </ddl-dd-layout-cell>
 </ng-container>

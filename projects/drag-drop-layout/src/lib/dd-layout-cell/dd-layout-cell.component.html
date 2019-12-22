@@ -7,7 +7,7 @@
  [resizeEdges] = "{top:edit,left:edit,right:edit,bottom:edit}"
  [ngStyle]="style" mwlResizable [validateResize]="validate" [enableGhostResize]="true"
  [style.zIndex] = "cellZindex"
- (cdkDragStarted) = "onDragStart($event)"
+ (cdkDragStarted) = "onDragStart()"
  (cdkDragMoved) = "onDragMove($event)"
  (cdkDragReleased) = "onDragEnd($event)"
  (resizeStart) ="onResizeStart($event)"

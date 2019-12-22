@@ -31,6 +31,8 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
   phStyle:any = {}
   @Output() gridLayoutRectChange:EventEmitter<LayoutRect>= new EventEmitter()
   @Output() onResize:EventEmitter<LayoutRect>= new EventEmitter()
+  @Output() dragMoving:EventEmitter<LayoutRect>= new EventEmitter()
+  @Output() dragEnd:EventEmitter<LayoutRect>= new EventEmitter()
   @ViewChild(CdkDrag,{static:true}) drag: CdkDrag
   @ViewChild('cellContainer',{static:true}) cellContainer:ElementRef
   @Input() dropList:CdkDropList
@@ -81,6 +83,12 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
       let height = Math.floor(rect.height/(rowHeight+gutter)) + 1
       let top =  Math.floor(rect.top/(rowHeight+gutter))
       let left =  Math.floor(rect.left/(colWidth+gutter))
+      if(left<0){
+        left = 0
+      }
+      if(top <0){
+        top =0
+      }
       return {top,left,width,height}
   }
   onResizeStart(event:ResizeEvent){
@@ -167,6 +175,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     })
     console.log(nt)
     this.phStyle = _.fromPairs(nt)
+    this.dragMoving.emit(this.calcGridRect(nrect))
   }
   onDragEnd(event){
     console.log(event)
@@ -175,7 +184,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     let rect = node.getBoundingClientRect()
     this.drag.reset()
     let gridRect = this.calcGridRect(rect)
-    this.gridLayoutRectChange.emit(gridRect)
+    this.dragEnd.emit(gridRect)
   }
   togglePlaceHolder(on:boolean){
     if(on){

@@ -1,9 +1,9 @@
 
 import { GridLayout, LayoutRect } from './../drag-drop-layout.model';
-import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, TemplateRef } from '@angular/core';
 
 import { CdkDropList, CDK_DROP_LIST_CONTAINER } from '@angular/cdk/drag-drop';
-
+import {pullAt} from 'lodash'
 @Component({
   selector: 'ddl-dd-layout-grid',
   templateUrl: './dd-layout-grid.component.html',
@@ -14,9 +14,10 @@ import { CdkDropList, CDK_DROP_LIST_CONTAINER } from '@angular/cdk/drag-drop';
 })
 export class DdLayoutGridComponent  implements OnInit {
 
-  @Input() cells:Array<{rect:LayoutRect,label:string}> =[]
+  @Input() cells:Array<{rect:LayoutRect,label:string,[k:string]:any}> =[]
   @Input() gutter:number = 8
   @Input() colsPerRow :number = 4
+  @Input() cellTemplate:TemplateRef<void>
   gridLayout:GridLayout = {}
   inited:boolean = false
   @ViewChild(CdkDropList,{static:true}) droplist:CdkDropList
@@ -61,26 +62,56 @@ export class DdLayoutGridComponent  implements OnInit {
     // this.gridLayout.colWidth = this.gridLayout.colWidth
   }
   onCellSizeChange(rect:LayoutRect, index:number,isResizing = false){
-    // this.cells[index].rect = Object.assign(this.cells[index].rect,rect)
-    // this.cells.sort((acell,bcell)=>{
-    //   if(acell.rect.top != bcell.rect.top){
-    //     return acell.rect.top - bcell.rect.top
-    //   } else {
-    //     return acell.rect.left - bcell.rect.left
-    //   }
-    // })
-    
-    let rects = this.cells.map(cell=>cell.rect)
-    // if(!isResizing){
-        rects[index] = rect
-    // }
-    rects = this.positionCells(rects)
+  
+    this.arrangeCells(rect,index)
+    if(!isResizing){
+      this.cells[index].rect = rect
+    }
+  }
+  arrangeCells(placeHolderRect:LayoutRect,index:number){
+    let nrects = this.cells.map(cell=>cell.rect)
+    pullAt(nrects,index)
+    if(!this.isOverlap(nrects,placeHolderRect)){
+      return
+    }
+    let holders = [placeHolderRect]
     this.cells.forEach((cell,i)=>{
-      if(i !== index ){
-        cell.rect = rects[i]
-      } else if(!isResizing){
-        cell.rect = rects[i]
-      }
+        if(index!=i){
+          let t = 0
+          let rect = null
+          while(!rect){
+            for(let l = 0 ; l< this.colsPerRow;l++){
+              let r = {top:t,left:l,width:cell.rect.width,height:cell.rect.height}
+              if(!this.isOverlap(holders,r)){
+                rect = r
+                break;
+              }
+            }
+            t+=1
+          }
+          if(rect){
+            cell.rect = rect
+            holders.push(rect)
+            return
+          }          
+        }
     })
+  }
+  isOverlap(rects:LayoutRect[],rect:LayoutRect){
+    for(let i = 0 ;i<rects.length;i++){
+      let ir = rects[i]
+      let {left, top, width,height} = ir
+      if(!(rect.left>=left+width || rect.left+rect.width<=left || rect.top>= top+height || rect.top+rect.height<=top)){
+        return true
+      }
+    }
+    return false
+  }
+  onDragMoving(rect:LayoutRect,index:number){
+    this.arrangeCells(rect,index)
+  }
+  onDragEnd(rect:LayoutRect,index:number){
+    this.arrangeCells(rect,index)
+    this.cells[index].rect = rect
   }
 }
