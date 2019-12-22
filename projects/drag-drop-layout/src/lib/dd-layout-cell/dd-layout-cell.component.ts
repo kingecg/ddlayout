@@ -30,6 +30,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
   style:any = {}
   phStyle:any = {}
   @Output() gridLayoutRectChange:EventEmitter<LayoutRect>= new EventEmitter()
+  @Output() onResize:EventEmitter<LayoutRect>= new EventEmitter()
   @ViewChild(CdkDrag,{static:true}) drag: CdkDrag
   @ViewChild('cellContainer',{static:true}) cellContainer:ElementRef
   @Input() dropList:CdkDropList
@@ -112,6 +113,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
       return p
     })
     this.phStyle = _.fromPairs(nt)
+    this.onResize.emit(this.calcGridRect( event.rectangle))
   }
 
   updateStyle(numberStyle?:LayoutRect){
@@ -153,8 +155,8 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     let node:HTMLElement = this.cellContainer.nativeElement
     let rect = node.getBoundingClientRect()
     let {top,left,width,height} = rect
-    top += 50*event.delta.y
-    left += 50*event.delta.x
+    // top += 50*event.delta.y
+    // left += 50*event.delta.x
     let nrect ={top,left,width,height} // this.calcRealRect(this.calcGridRect({top,left,width,height}))
     let arrt =_.toPairs(nrect)
     let nt = arrt.map(paire=>{

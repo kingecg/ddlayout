@@ -1,7 +1,7 @@
 
-import { GridLayout } from './../drag-drop-layout.model';
+import { GridLayout, LayoutRect } from './../drag-drop-layout.model';
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
-import { LayoutRect } from '../drag-drop-layout.model';
+
 import { CdkDropList, CDK_DROP_LIST_CONTAINER } from '@angular/cdk/drag-drop';
 
 @Component({
@@ -28,24 +28,27 @@ export class DdLayoutGridComponent  implements OnInit {
     this.initCalc()
   }
 
-  positionCells(){
+  positionCells(rects:LayoutRect[]){
     let start_x = 0
     let start_y = 0
     let rows = 1
-     this.cells.map(cell=>{
-      let rect = Object.assign({},cell.rect)
+     return rects.map(rectt=>{
+      let rect = Object.assign({},rectt)
+      if(start_x>=this.colsPerRow || start_x+rect.width>this.colsPerRow){
+        start_x = 0
+        start_y = start_y + rows
+      }
       rect.top = start_y
       rect.left = start_x
+     
+      console.log('D',rect)
       if(rows<rect.height){
         rows = rect.height
       }
       start_x = start_x + rect.width
-      if(start_x>=this.colsPerRow){
-        start_x = 0
-        start_y = start_y + rows
-      }
-      cell.rect = rect
-    })
+      
+     return rect
+    }) 
     // this.cells = ncells
   }
   initCalc(){
@@ -57,8 +60,27 @@ export class DdLayoutGridComponent  implements OnInit {
     this.inited =true
     // this.gridLayout.colWidth = this.gridLayout.colWidth
   }
-  onCellSizeChange(rect:LayoutRect, index:number){
-    this.cells[index].rect = Object.assign(this.cells[index],rect)
-    this.positionCells()
+  onCellSizeChange(rect:LayoutRect, index:number,isResizing = false){
+    // this.cells[index].rect = Object.assign(this.cells[index].rect,rect)
+    // this.cells.sort((acell,bcell)=>{
+    //   if(acell.rect.top != bcell.rect.top){
+    //     return acell.rect.top - bcell.rect.top
+    //   } else {
+    //     return acell.rect.left - bcell.rect.left
+    //   }
+    // })
+    
+    let rects = this.cells.map(cell=>cell.rect)
+    // if(!isResizing){
+        rects[index] = rect
+    // }
+    rects = this.positionCells(rects)
+    this.cells.forEach((cell,i)=>{
+      if(i !== index ){
+        cell.rect = rects[i]
+      } else if(!isResizing){
+        cell.rect = rects[i]
+      }
+    })
   }
 }
