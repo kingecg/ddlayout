@@ -1,0 +1,9 @@
+{
+  "sourceRoots": [
+    "./src",
+    "./projects/drag-drop-layout/src"
+  ],
+  "angularCli": {
+    "appName": "playground"
+  }
+}

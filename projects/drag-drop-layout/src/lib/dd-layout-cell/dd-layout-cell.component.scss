@@ -1,0 +1,53 @@
+.cell-container{
+    border:none;
+    min-width: 20px;
+    min-height: 20px;
+    position: absolute;
+    box-sizing: border-box;
+    transition: all .15s;
+    .resize-handle {
+        display: none;
+    }
+    &.edit {
+        border:1px dashed grey;
+        border-radius: 5px;
+        .resize-handle {
+            display: block;
+            position: absolute;
+        }
+        .resize-handle-top,
+        .resize-handle-bottom {
+          
+          height: 5px;
+          cursor: row-resize;
+          width: 100%;
+        }
+        .resize-handle-top {
+          top: 0;
+        }
+        .resize-handle-bottom {
+          bottom: 0;
+        }
+        .resize-handle-left,
+        .resize-handle-right {
+        
+          height: 100%;
+          cursor: col-resize;
+          width: 5px;
+        }
+        .resize-handle-left {
+          left: 0;
+        }
+        .resize-handle-right {
+          right: 0;
+        }
+    }
+}
+.placeholder {
+  background: #ccc;
+  border: dotted 3px #999;
+  min-height: 60px;
+  transition:  all .15s;
+  display: block;
+  position: absolute;
+}

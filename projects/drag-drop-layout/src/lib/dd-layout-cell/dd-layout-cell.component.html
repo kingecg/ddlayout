@@ -1,0 +1,41 @@
+
+<div class="cell-container"
+ #cellContainer
+ cdkDrag
+ [cdkDragDisabled]="disableDrag"
+ [class.edit] = "edit"
+ [resizeEdges] = "{top:edit,left:edit,right:edit,bottom:edit}"
+ [ngStyle]="style" mwlResizable [validateResize]="validate" [enableGhostResize]="true"
+ [style.zIndex] = "cellZindex"
+ (cdkDragStarted) = "onDragStart($event)"
+ (cdkDragMoved) = "onDragMove($event)"
+ (cdkDragReleased) = "onDragEnd($event)"
+ (resizeStart) ="onResizeStart($event)"
+ (resizing) ="onResizing($event)"
+    (resizeEnd)="onResizeEnd($event)">
+    <!-- <div
+    class="resize-handle resize-handle-top"
+    mwlResizeHandle
+    [resizeEdges]="{ top: true }"
+  ></div>
+  <div
+    class="resize-handle resize-handle-left"
+    mwlResizeHandle
+    [resizeEdges]="{ left: true }"
+  ></div> -->
+  <div
+    class="resize-handle resize-handle-right"
+    mwlResizeHandle
+    [resizeEdges]="{ right: true }"
+    (mousedown) = "disableDrag=true"
+  ></div>
+  <div
+    class="resize-handle resize-handle-bottom"
+    mwlResizeHandle
+    [resizeEdges]="{ bottom: true }"
+    (mousedown) = "disableDrag=true"
+  ></div>
+  <ng-content></ng-content>
+  <!-- <div class="placeholder" *cdkDragPlaceholder [style.width.px]="layout.width" [style.height.px]="layout.height"></div> -->
+</div>
+<div class="placeholder" *ngIf="showPlaceHolder" [ngStyle]="phStyle"></div>

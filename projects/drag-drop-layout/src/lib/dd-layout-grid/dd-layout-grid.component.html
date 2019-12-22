@@ -1,0 +1,6 @@
+<ng-container *ngIf="inited">
+    <ddl-dd-layout-cell *ngFor="let cell of cells; index as i; " [gridContainer]="gridLayout" [dropList]="droplist"
+        [edit]="true" [gridLayoutRect]="cell.rect" (gridLayoutRectChange)="onCellSizeChange($event,i)">
+        {{cell.label}}
+    </ddl-dd-layout-cell>
+</ng-container>
