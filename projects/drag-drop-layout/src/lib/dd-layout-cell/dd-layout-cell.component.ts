@@ -79,10 +79,11 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
       } 
       let {containerWidth,gutter,cols,rowHeight} = this.gridContainer
       let colWidth =  (containerWidth - gutter * (cols - 1)) / cols
-      let width = Math.floor(rect.width/(colWidth+gutter)) + 1
-      let height = Math.floor(rect.height/(rowHeight+gutter)) + 1
-      let top =  Math.floor(rect.top/(rowHeight+gutter))
-      let left =  Math.floor(rect.left/(colWidth+gutter))
+      let width = Math.floor(Math.round(rect.width)/(colWidth+gutter)) + 1
+      let height = Math.floor(Math.round(rect.height)/(rowHeight+gutter)) + 1
+      let top =  Math.floor(Math.round(rect.top+gutter)/(rowHeight+gutter))
+      // console.log('Calc:',rect.top,rowHeight+gutter,top)
+      let left =  Math.floor(Math.round(rect.left+gutter)/(colWidth+gutter))
       if(left<0){
         left = 0
       }
@@ -111,9 +112,10 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     this.cellZindex = 0
   }
   onResizing(event:ResizeEvent){
-   console.log(event.rectangle)
-    let rect = this.calcRealRect(this.calcGridRect( event.rectangle))
-    console.log(rect)
+    let grect = this.calcGridRect( event.rectangle)
+    // console.log(grect)
+    let rect = this.calcRealRect(grect)
+    // console.log(rect)
     let nt = _.toPairs(rect).map(paire=>{
       let p = []
       p.push(paire[0])
@@ -121,7 +123,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
       return p
     })
     this.phStyle = _.fromPairs(nt)
-    this.onResize.emit(this.calcGridRect( event.rectangle))
+    this.onResize.emit(grect)
   }
 
   updateStyle(numberStyle?:LayoutRect){
@@ -140,7 +142,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     if(!this.gridContainer){
       return true
     } else {
-     return  resizeEvent.rectangle.left + resizeEvent.rectangle.width < this.gridContainer.containerWidth
+     return  resizeEvent.rectangle.left + resizeEvent.rectangle.width <= this.gridContainer.containerWidth
     }
     // return true
   }

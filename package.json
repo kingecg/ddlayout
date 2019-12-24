@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "playground": "angular-playground"
+    "playground": "angular-playground --ng-cli-port 4206"
   },
   "private": true,
   "dependencies": {
@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "~8.2.14",
     "@angular/router": "~8.2.14",
     "@types/lodash": "^4.14.149",
+    "angular-playground": "^6.1.2",
     "angular-resizable-element": "^3.2.6",
     "core-js": "^3.6.0",
     "magic-grid": "^3.2.4",

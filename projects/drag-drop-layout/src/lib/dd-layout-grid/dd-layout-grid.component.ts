@@ -27,6 +27,7 @@ export class DdLayoutGridComponent  implements OnInit {
 
   ngOnInit() {
     this.initCalc()
+    this.updateCell()
   }
 
   positionCells(rects:LayoutRect[]){
@@ -69,6 +70,7 @@ export class DdLayoutGridComponent  implements OnInit {
     }
   }
   arrangeCells(placeHolderRect:LayoutRect,index:number){
+    console.log('Detect:',placeHolderRect,index)
     let nrects = this.cells.map(cell=>cell.rect)
     pullAt(nrects,index)
     if(!this.isOverlap(nrects,placeHolderRect)){
@@ -77,6 +79,10 @@ export class DdLayoutGridComponent  implements OnInit {
     let holders = [placeHolderRect]
     this.cells.forEach((cell,i)=>{
         if(index!=i){
+          if(!this.isOverlap(holders,cell.rect)){
+            holders.push(cell.rect)
+            return
+          }
           let t = 0
           let rect = null
           while(!rect){
@@ -101,11 +107,52 @@ export class DdLayoutGridComponent  implements OnInit {
     for(let i = 0 ;i<rects.length;i++){
       let ir = rects[i]
       let {left, top, width,height} = ir
-      if(!(rect.left>=left+width || rect.left+rect.width<=left || rect.top>= top+height || rect.top+rect.height<=top)){
+      if(!(rect.left>=left+width || rect.left+rect.width<=left || rect.top>= top+height || rect.top+rect.height<=top)||rect.width+rect.left>this.colsPerRow){
+        console.log('Overlap:',rects,rect,true)
         return true
       }
     }
+    console.log('Overlap:',rects,rect,false)
     return false
+  }
+  addCell(nrect:LayoutRect){
+    let holders = this.cells.map(cell=>cell.rect)
+    let t = 0
+    let rect = null
+    while(!rect){
+      for(let l = 0 ; l< this.colsPerRow;l++){
+        let r = {top:t,left:l,width:nrect.width,height:nrect.height}
+        if(!this.isOverlap(holders,r)){
+          rect = r
+          break;
+        }
+      }
+      t+=1
+    }
+    return rect
+  }
+  updateCell(){
+    let unPositioned = []
+    let positioned = []
+    this.cells.forEach(cell=>{
+      if(!cell.rect || cell.rect.top === undefined || cell.rect.left === undefined){
+        unPositioned.push(cell)
+      } else {
+        positioned.push(cell)
+      }
+    })
+    if(unPositioned.length > 0){
+      this.cells = positioned
+      unPositioned.forEach(cell=>{
+        let nrect = {
+          width: cell.rect?cell.rect.width||1:1,
+          height: cell.rect?cell.rect.height||1:1
+        }
+        let frect = this.addCell(nrect)
+        cell.rect = frect
+        this.cells.push(cell)
+      })
+    }
   }
   onDragMoving(rect:LayoutRect,index:number){
     this.arrangeCells(rect,index)

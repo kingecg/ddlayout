@@ -212,7 +212,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "playground:build",
-            "port": 4201
+            "port": 4206
           }
         }
       }
