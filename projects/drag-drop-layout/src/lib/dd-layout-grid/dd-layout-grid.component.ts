@@ -1,6 +1,6 @@
 
 import { GridLayout, LayoutRect } from './../drag-drop-layout.model';
-import { Component, OnInit, Input, ElementRef, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, TemplateRef, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 
 import { CdkDropList, CDK_DROP_LIST_CONTAINER } from '@angular/cdk/drag-drop';
 import {pullAt} from 'lodash'
@@ -12,9 +12,11 @@ import {pullAt} from 'lodash'
     // {provide: CDK_DROP_LIST_CONTAINER, useExisting: CdkDropList},
   ]
 })
-export class DdLayoutGridComponent  implements OnInit {
+export class DdLayoutGridComponent  implements OnInit,OnChanges {
+  
 
   @Input() cells:Array<{rect:LayoutRect,label:string,[k:string]:any}> =[]
+  @Input() cellsChange:EventEmitter<Array<{rect:LayoutRect,label:string,[k:string]:any}>> = new EventEmitter()
   @Input() gutter:number = 8
   @Input() colsPerRow :number = 4
   @Input() cellTemplate:TemplateRef<void>
@@ -28,6 +30,11 @@ export class DdLayoutGridComponent  implements OnInit {
   ngOnInit() {
     this.initCalc()
     this.updateCell()
+  }
+  ngOnChanges(changes:SimpleChanges): void {
+    if(changes.cells&&!changes.cells.isFirstChange()){
+      this.updateCell()
+    }
   }
 
   positionCells(rects:LayoutRect[]){
@@ -67,6 +74,7 @@ export class DdLayoutGridComponent  implements OnInit {
     this.arrangeCells(rect,index)
     if(!isResizing){
       this.cells[index].rect = rect
+      this.cellsChange.emit(this.cells)
     }
   }
   arrangeCells(placeHolderRect:LayoutRect,index:number){
@@ -77,6 +85,7 @@ export class DdLayoutGridComponent  implements OnInit {
       return
     }
     let holders = [placeHolderRect]
+    let newPosition = []
     this.cells.forEach((cell,i)=>{
         if(index!=i){
           if(!this.isOverlap(holders,cell.rect)){
@@ -96,12 +105,18 @@ export class DdLayoutGridComponent  implements OnInit {
             t+=1
           }
           if(rect){
-            cell.rect = rect
+            // cell.rect = rect
+            newPosition.push({index:i,rect})
             holders.push(rect)
             return
           }          
         }
     })
+    if(newPosition.length){
+      newPosition.forEach(np=>{
+        this.cells[np.index].rect = np.rect
+      })
+    }
   }
   isOverlap(rects:LayoutRect[],rect:LayoutRect){
     for(let i = 0 ;i<rects.length;i++){
@@ -160,5 +175,6 @@ export class DdLayoutGridComponent  implements OnInit {
   onDragEnd(rect:LayoutRect,index:number){
     this.arrangeCells(rect,index)
     this.cells[index].rect = rect
+    this.cellsChange.emit(this.cells)
   }
 }
