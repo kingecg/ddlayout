@@ -1,3 +1,5 @@
+import { InjectionToken } from '@angular/core';
+
 export interface LayoutCell {
     col:number,
     row:number,
@@ -18,3 +20,4 @@ export interface GridLayout {
   gutter?:number,
   rowHeight?:number  
 }
+export const GRIDCONTAINER = new InjectionToken('GRIDCONTAINER')

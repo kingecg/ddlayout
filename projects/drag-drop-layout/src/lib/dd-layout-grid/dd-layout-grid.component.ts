@@ -1,5 +1,5 @@
 
-import { GridLayout, LayoutRect } from './../drag-drop-layout.model';
+import { GridLayout, LayoutRect, GRIDCONTAINER } from './../drag-drop-layout.model';
 import { Component, OnInit, Input, ElementRef, ViewChild, TemplateRef, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 
 import { CdkDropList, CDK_DROP_LIST_CONTAINER } from '@angular/cdk/drag-drop';
@@ -9,7 +9,7 @@ import {pullAt} from 'lodash'
   templateUrl: './dd-layout-grid.component.html',
   styleUrls: ['./dd-layout-grid.component.scss'],
   providers:[
-    // {provide: CDK_DROP_LIST_CONTAINER, useExisting: CdkDropList},
+     {provide: GRIDCONTAINER,useExisting:DdLayoutGridComponent},
   ]
 })
 export class DdLayoutGridComponent  implements OnInit,OnChanges {
@@ -37,6 +37,10 @@ export class DdLayoutGridComponent  implements OnInit,OnChanges {
     }
   }
 
+  getVerticalScroll(){
+    let node:HTMLElement = this.el.nativeElement
+    return node.scrollTop
+  }
   positionCells(rects:LayoutRect[]){
     let start_x = 0
     let start_y = 0
@@ -123,11 +127,11 @@ export class DdLayoutGridComponent  implements OnInit,OnChanges {
       let ir = rects[i]
       let {left, top, width,height} = ir
       if(!(rect.left>=left+width || rect.left+rect.width<=left || rect.top>= top+height || rect.top+rect.height<=top)||rect.width+rect.left>this.colsPerRow){
-        console.log('Overlap:',rects,rect,true)
+        // console.log('Overlap:',rects,rect,true)
         return true
       }
     }
-    console.log('Overlap:',rects,rect,false)
+    // console.log('Overlap:',rects,rect,false)
     return false
   }
   addCell(nrect:LayoutRect){

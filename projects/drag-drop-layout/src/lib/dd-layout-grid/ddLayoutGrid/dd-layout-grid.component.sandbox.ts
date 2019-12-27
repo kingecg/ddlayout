@@ -21,10 +21,10 @@ export default sandboxOf(DdLayoutGridComponent,{
     template: `<ddl-dd-layout-grid style="display:block;width:1000px;height:1000px;overflow:hidden" [cells]="cells"></ddl-dd-layout-grid>`,
     context:{
       cells:[
-        {rect:{top:0,left:0,width:1,height:1},label:'a'},
-        {rect:{top:0,left:1,width:1,height:1},label:'b'},
-        {rect:{top:0,left:2,width:1,height:1},label:'c'},
-        {rect:{top:0,left:3,width:1,height:1},label:'d'},
+        {rect:{top:0,left:0,width:2,height:2},label:'a'},
+        {rect:{top:0,left:2,width:1,height:1},label:'b'},
+        {rect:{top:0,left:3,width:1,height:1},label:'c'},
+        {rect:{top:1,left:2,width:1,height:1},label:'d'},
       ]
     }
   }).add('add cell', {
@@ -32,15 +32,15 @@ export default sandboxOf(DdLayoutGridComponent,{
     <div>
     宽度：<input type="number" [(ngModel)]="width">高度：<input type="number" [(ngModel)]="height"><button (click)="add()">add</button>
     </div>
-    <ddl-dd-layout-grid style="display:block;width:1000px;height:1000px;overflow:hidden;position:relative" [(cells)]="cells"></ddl-dd-layout-grid>`,
+    <ddl-dd-layout-grid style="display:block;width:1000px;height:1000px;overflow:hidden scroll;position:relative" [(cells)]="cells"></ddl-dd-layout-grid>`,
     context:{
       height:1,
       width:1,
       cells:[
-        {rect:{top:0,left:0,width:1,height:1},label:'a'},
-        {rect:{top:0,left:1,width:1,height:1},label:'b'},
-        {rect:{top:0,left:2,width:1,height:1},label:'c'},
-        {rect:{top:0,left:3,width:1,height:1},label:'d'},
+        {rect:{top:0,left:0,width:2,height:2},label:'a'},
+        {rect:{top:0,left:2,width:1,height:1},label:'b'},
+        {rect:{top:0,left:3,width:1,height:1},label:'c'},
+        {rect:{top:1,left:2,width:1,height:1},label:'d'},
       ],
       add:function(){
         this.cells = [].concat(this.cells,[{rect:{width:this.width,height:this.height},label:`add_${Date.now()}`}])

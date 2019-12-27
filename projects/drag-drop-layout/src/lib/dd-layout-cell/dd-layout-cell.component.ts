@@ -1,17 +1,18 @@
-import { LayoutRect, GridLayout } from './../drag-drop-layout.model';
-import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { LayoutRect, GridLayout, GRIDCONTAINER } from './../drag-drop-layout.model';
+import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit, ElementRef, OnDestroy, Optional, Inject } from '@angular/core';
 import {ResizeEvent} from 'angular-resizable-element'
 import * as _ from 'lodash'
 import { CDK_DROP_LIST_CONTAINER, CdkDropList, CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
+import { Subject, Subscription } from 'rxjs';
+import {distinctUntilChanged} from 'rxjs/operators'
+import { DdLayoutGridComponent } from '../dd-layout-grid/dd-layout-grid.component';
 @Component({
   selector: 'ddl-dd-layout-cell',
   templateUrl: './dd-layout-cell.component.html',
   styleUrls: ['./dd-layout-cell.component.scss']
 })
-export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
- 
+export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit,OnDestroy {
   
-
   disableDrag:boolean = false
   showPlaceHolder:boolean = false
   cellZindex:number = 0
@@ -36,17 +37,35 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
   @ViewChild(CdkDrag,{static:true}) drag: CdkDrag
   @ViewChild('cellContainer',{static:true}) cellContainer:ElementRef
   @Input() dropList:CdkDropList
-  constructor() { }
+  movingSubject:Subject<LayoutRect> = new Subject()
+  resizingSubject:Subject<LayoutRect> = new Subject()
+  subs:Array<Subscription> = []
+
+  constructor(@Optional() @Inject(GRIDCONTAINER) public parent:DdLayoutGridComponent) { }
+  
   ngAfterViewInit(): void {
     if(this.dropList){
       this.drag._dragRef._withDropContainer(this.dropList._dropListRef)
     }
+  }
+  ngOnDestroy (): void {
+    throw new Error("Method not implemented.");
   }
   ngOnInit() {
     if(this.gridLayoutRect){
      this.layout = this.calcRealRect(this.gridLayoutRect)
       this.updateStyle()
     }
+    this.subs.push(this.movingSubject.pipe(distinctUntilChanged((p,q)=>{
+      return _.isEqual(p,q)
+    })).subscribe((rect)=>{
+      this.dragMoving.emit(rect)
+    }))
+    this.subs.push(this.resizingSubject.pipe(distinctUntilChanged((p,q)=>{
+      return _.isEqual(p,q)
+    })).subscribe((rect)=>{
+      this.onResize.emit(rect)
+    }))
   }
   ngOnChanges(changes:SimpleChanges): void {
     if(changes.gridLayoutRect && !changes.gridLayoutRect.isFirstChange()){
@@ -62,6 +81,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
 
   calcRealRect(gridLayout:LayoutRect){
     let {top,left,width,height} = gridLayout
+    let scrollTop = this.parent?this.parent.getVerticalScroll():0
     if(this.gridContainer){
       let {containerWidth,gutter,cols,rowHeight} = this.gridContainer
       let colWidth =  (containerWidth - gutter * (cols - 1)) / cols
@@ -94,7 +114,9 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
   }
   onResizeStart(event:ResizeEvent){
     this.togglePlaceHolder(true)
-    let rect = event.rectangle
+    let rect = event.rectangle 
+    // let scrollTop = this.parent?this.parent.getVerticalScroll():0
+    //  rect.top +=scrollTop
     let nt = _.toPairs(rect).map(paire=>{
       let p = []
       p.push(paire[0])
@@ -104,15 +126,21 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     this.phStyle = _.fromPairs(nt)
   }
   onResizeEnd(event:ResizeEvent){
-    
-    let rect = this.calcGridRect(event.rectangle)
+    let nrect = event.rectangle 
+    // let scrollTop = this.parent?this.parent.getVerticalScroll():0
+    //  nrect.top +=scrollTop
+    nrect.top = this.layout.top
+    let rect = this.calcGridRect(nrect)
     this.gridLayoutRectChange.emit(rect)
     this.disableDrag = false
     this.togglePlaceHolder(false)
     this.cellZindex = 0
   }
   onResizing(event:ResizeEvent){
-    let grect = this.calcGridRect( event.rectangle)
+    let nrect = event.rectangle 
+    // let scrollTop = this.parent?this.parent.getVerticalScroll():0
+     nrect.top = this.layout.top
+    let grect = this.calcGridRect( nrect)
     // console.log(grect)
     let rect = this.calcRealRect(grect)
     // console.log(rect)
@@ -123,7 +151,7 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
       return p
     })
     this.phStyle = _.fromPairs(nt)
-    this.onResize.emit(grect)
+    this.resizingSubject.next(grect)
   }
 
   updateStyle(numberStyle?:LayoutRect){
@@ -151,8 +179,10 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     let node:HTMLElement = this.cellContainer.nativeElement
     let rect = node.getBoundingClientRect()
     let {top,left,width,height} = rect
-    
-    let arrt =_.toPairs({top,left,width,height})
+    let nrect ={top,left,width,height}
+    let scrollTop = this.parent?this.parent.getVerticalScroll():0
+    nrect.top +=scrollTop
+    let arrt =_.toPairs(nrect)
     let nt = arrt.map(paire=>{
       let p = []
       p.push(paire[0])
@@ -168,6 +198,9 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     // top += 50*event.delta.y
     // left += 50*event.delta.x
     let nrect ={top,left,width,height} // this.calcRealRect(this.calcGridRect({top,left,width,height}))
+    // let nrect = event.rectangle 
+    let scrollTop = this.parent?this.parent.getVerticalScroll():0
+     nrect.top +=scrollTop
     let arrt =_.toPairs(nrect)
     let nt = arrt.map(paire=>{
       let p = []
@@ -177,15 +210,23 @@ export class DdLayoutCellComponent implements OnInit, OnChanges,AfterViewInit {
     })
     console.log(nt)
     this.phStyle = _.fromPairs(nt)
-    this.dragMoving.emit(this.calcGridRect(nrect))
+    let ngRect = this.calcGridRect(nrect)
+   
+      this.movingSubject.next(ngRect)
+    
+    
   }
   onDragEnd(event){
     console.log(event)
     this.togglePlaceHolder(false)
     let node:HTMLElement = this.cellContainer.nativeElement
     let rect = node.getBoundingClientRect()
+    let {top,left,width,height} = rect
+    let nrect = {top,left,width,height}
+    let scrollTop = this.parent?this.parent.getVerticalScroll():0
+    nrect.top +=scrollTop
     this.drag.reset()
-    let gridRect = this.calcGridRect(rect)
+    let gridRect = this.calcGridRect(nrect)
     this.dragEnd.emit(gridRect)
   }
   togglePlaceHolder(on:boolean){
