@@ -24,6 +24,12 @@
       ],
       "drag-drop-layout/*": [
         "dist/drag-drop-layout/*"
+      ],
+      "cg-layout": [
+        "dist/cg-layout"
+      ],
+      "cg-layout/*": [
+        "dist/cg-layout/*"
       ]
     }
   }

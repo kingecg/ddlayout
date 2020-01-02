@@ -6,7 +6,8 @@
     },
     "include": [
       "**/*.ts",
-      "../projects/my-lib/src/**/*.ts"
+      "./projects/**/*.ts",
+      "./projects/cg-layout/src/**/*.ts"
     ],
     "exclude": [
       "test.ts",

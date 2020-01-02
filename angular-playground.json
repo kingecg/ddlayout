@@ -1,9 +1,14 @@
 {
   "sourceRoots": [
     "./src",
-    "./projects/drag-drop-layout/src"
+    "./projects/drag-drop-layout/src",
+    "./projects/cg-layout/src"
   ],
   "angularCli": {
-    "appName": "playground"
-  }
+    "appName": "playground",
+    "port": 4206
+  },
+  "timeout": 5,
+  "noWatch": false,
+  "noServe": false
 }
